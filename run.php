@@ -26,20 +26,13 @@ class zCrawlObserver extends CrawlObserver
         ResponseInterface $response,
         ?UriInterface $foundOnUrl = null
     ) {
-        
+        $this->productList = [];
+
         $z2cConverter = new zh2cnConvert();
         $domCrawler = new DomCrawler((string)$response->getBody());
-        
-        // Get the product json data block
-        $domFetched = $domCrawler->filter('script[type="application/ld+json"][data-rh="true"]');
-
-        // The number of products must more then 50, if not then throw exception, outside will try to crawl again
-        if ($domFetched->count() < 50) {
-            throw new Exception('The page not loaded');
-        }
 
         // Loop every json block that fetched
-        foreach ($domFetched as $jsonBlock) {
+        foreach ($domCrawler->filter('script[type="application/ld+json"][data-rh="true"]') as $jsonBlock) {
             $productFetched = json_decode($jsonBlock->nodeValue, true);
             
             // Not every json item is "product"
@@ -52,6 +45,11 @@ class zCrawlObserver extends CrawlObserver
             $product['price'] = (true === isset($productFetched['offers']['price'])) ? ('$' . $productFetched['offers']['price']) : ('$' . $productFetched['offers']['lowPrice'] . ' - $' . $productFetched['offers']['highPrice']);
             
             $this->productList[] = $product;
+        }
+
+        // The number of products must more then 0, if not then throw exception, outside will try to crawl again
+        if (0 === count($this->productList)) {
+            throw new Exception('The page not loaded');
         }
         
         foreach ($this->productList as $prod) {
