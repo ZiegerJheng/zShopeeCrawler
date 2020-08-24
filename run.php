@@ -21,6 +21,12 @@ class zCrawlObserver extends CrawlObserver
 {
     public $productList = [];
 
+    private $z2cConverter;
+
+    public function __construct() {
+        $this->z2cConverter = new zh2cnConvert();
+    }
+
     public function crawled(
         UriInterface $url,
         ResponseInterface $response,
@@ -28,7 +34,6 @@ class zCrawlObserver extends CrawlObserver
     ) {
         $this->productList = [];
 
-        $z2cConverter = new zh2cnConvert();
         $domCrawler = new DomCrawler((string)$response->getBody());
 
         // Loop every json block that fetched
@@ -41,7 +46,7 @@ class zCrawlObserver extends CrawlObserver
             }
 
             // Get product name and price, the product name will conver to Simplified Chinese using z2cConverter
-            $product['name'] = $z2cConverter->convert(html_entity_decode($productFetched['name']));
+            $product['name'] = $this->z2cConverter->convert(html_entity_decode($productFetched['name']));
             $product['price'] = (true === isset($productFetched['offers']['price'])) ? ('$' . $productFetched['offers']['price']) : ('$' . $productFetched['offers']['lowPrice'] . ' - $' . $productFetched['offers']['highPrice']);
             
             $this->productList[] = $product;
@@ -77,6 +82,8 @@ class zCrawlObserver extends CrawlObserver
 $tryLimit = 5;
 $attempts = 0;
 
+$zco = new zCrawlObserver();
+
 // If catch exception then try to crawl again, if try times more than $tryLimit then stop trying
 do {
 
@@ -85,7 +92,7 @@ do {
         Crawler::create()->setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36')
             ->setMaximumCrawlCount(1)
             ->executeJavaScript()
-            ->setCrawlObserver(new zCrawlObserver())
+            ->setCrawlObserver($zco)
             ->startCrawling('https://shopee.tw/%E7%8E%A9%E5%85%B7-cat.75.2185?brands=5005&locations=-1&page=0&ratingFilter=4');
     } catch (Exception $e) {
         echo "Try again ...\n";
