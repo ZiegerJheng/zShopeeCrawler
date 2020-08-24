@@ -2,62 +2,78 @@
 
 class zh2cnConvert {
 
-    private $conversionTable = [];
+    private $vocabularyTree = [];
 
+    /** 
+     * In construction function, will build vocabulary tree from conversion table.
+     */
     public function __construct() {
-        $pointer = &$this->conversionTable;
+        $pointer = &$this->vocabularyTree;
 
-        // 跑過每一個字或語詞對應
+        // Loop every word or vocabulary on conversion table
         foreach (($this->zh2Hans + $this->zh2CN) as $zh => $cn) {
-            $pointer = &$this->conversionTable;
+            // Tree back to root level
+            $pointer = &$this->vocabularyTree;
 
+            // Loop every character
             foreach (mb_str_split($zh) as $char) {
+                // If this character not exist on corresponding level of tree, then create for it
                 if (false === isset($pointer[$char])) {
                     $pointer[$char] = [];
                 }
 
+                // Tree go next level
                 $pointer = &$pointer[$char];
             }
 
+            // Assign Simplified Chinese on last character of this vocabulary
             $pointer = [ 'E' => array($cn) ];
         }
     }
 
+    /** 
+     * Convert the string from Traditional Chinese to Simplified Chinese
+     */
     public function convert($str) {
         $convertedStr = '';
 
-        $pointer = &$this->conversionTable;
+        $pointer = &$this->vocabularyTree;
         $tmpStr = '';
 
+        // Loop every character in $str
         $strSplited = mb_str_split($str);
         foreach ($strSplited as $key => $char) {
+            // If this character match success but this point on tree not have end point, then keep the character into $tmpStr
+            // If match fail later, we can get the character from $tmoStr ot it will lose character
             if (true === array_key_exists($char, $pointer) && false === isset($pointer[$char]['E'])) {
                 $tmpStr .= $char;
             }
 
+            // This character match success
             if (true === array_key_exists($char, $pointer)) {
-                // 下一個也對，繼續往下走
+                // Next character match also auccess, so tree go next level
                 if (true === array_key_exists($strSplited[($key + 1)], $pointer[$char])) {
                     $pointer = &$pointer[$char];
                 }
-                // 下一個不對+此處有節點，比對結束，放入比對結果。
+                // Next character match fail & this point have end point, so put the match result result and match process end
                 else if (false === array_key_exists($strSplited[($key + 1)], $pointer[$char]) && true === isset($pointer[$char]['E'])) {
                     $convertedStr .= $pointer[$char]['E'][0];
 
-                    $pointer = &$this->conversionTable;
+                    $pointer = &$this->vocabularyTree;
                 }
-                // 往下比對結束
+                // All none, match process end
                 else {
                     $convertedStr .= $tmpStr;
 
-                    $pointer = &$this->conversionTable;
+                    $pointer = &$this->vocabularyTree;
                     $tmpStr = '';
                 }
             }
+            // This character match fail
             else {
                 $convertedStr .= $tmpStr . $char;
 
-                $pointer = &$this->conversionTable;
+                $pointer = &$this->vocabularyTree;
                 $tmpStr = '';
             }
         }
