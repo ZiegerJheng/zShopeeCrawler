@@ -44,7 +44,7 @@ class zh2cnConvert {
         $strSplited = mb_str_split($str);
         foreach ($strSplited as $key => $char) {
             // If this character match success but this point on tree not have end point, then keep the character into $tmpStr
-            // If match fail later, we can get the character from $tmoStr ot it will lose character
+            // If match fail later, we can get the character from $tmoStr or it will lose character
             if (true === array_key_exists($char, $pointer) && false === isset($pointer[$char]['E'])) {
                 $tmpStr .= $char;
             }
