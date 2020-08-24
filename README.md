@@ -7,7 +7,7 @@ A simple Shopee Crawler, will get product title and price. Also translate produc
 - node 7.6.0 or higher
 - Puppeteer Node library
 
-Required by Browsershot package to execute Javascript, please reference [here](https://github.com/spatie/crawler#executing-javascript)
+Required by Browsershot package to execute Javascript, please reference [here](https://github.com/spatie/crawler#executing-javascript).
 
 ## Usage
 
@@ -50,6 +50,8 @@ $220.00 - $999.00
 $200.00 - $220.00
 ---
 ```
+
+Completed sample running output please reference [here](https://raw.githubusercontent.com/ZiegerJheng/zShopeeCrawler/master/detail_output.txt).
 
 ## References
 
