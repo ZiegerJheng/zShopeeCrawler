@@ -1,0 +1,20 @@
+{
+    "name": "shjheng/z-shopee-crawler",
+    "description": "A simple Shopee Crawler, will get product title and price. Also translate product title from Traditional Chinese to Simplified Chinese.",
+    "type": "project",
+    "authors": [
+        {
+            "name": "Zieger Jheng",
+            "email": "shjheng@gmail.com"
+        }
+    ],
+    "require": {
+        "spatie/crawler": "^4.7",
+        "symfony/css-selector": "^5.1"
+    },
+    "autoload": {
+        "classmap": [
+            "libraries"
+        ]
+    }
+}
